@@ -31,7 +31,7 @@ import sys
 import csv
 from time import process_time 
 
-def loadCSVFile (file, lst, sep=";"):
+def loadCSVFile (file, lst, sep=";")->list:
     """
     Carga un archivo csv a una lista
     Args:
@@ -51,6 +51,7 @@ def loadCSVFile (file, lst, sep=";"):
     t1_start = process_time() #tiempo inicial
     dialect = csv.excel()
     dialect.delimiter=sep
+
     try:
         with open(file, encoding="utf-8") as csvfile:
             spamreader = csv.DictReader(csvfile, dialect=dialect)
@@ -62,19 +63,82 @@ def loadCSVFile (file, lst, sep=";"):
     
     t1_stop = process_time() #tiempo final
     print("Tiempo de ejecución ",t1_stop-t1_start," segundos")
+    return lst
 
 def printMenu():
     """
     Imprime el menu de opciones
     """
-    print("\nBienvenido")
-    print("1- Cargar Datos")
-    print("2- Contar los elementos de la Lista")
-    print("3- Contar elementos filtrados por palabra clave")
-    print("4- Consultar elementos a partir de dos listas")
+    print("\n**************************************************************************************")
+    print("\n Bienvenidos a la consola del Reto 1 Explorando la           ***    MAGIA DEL CINE ***")
+    print("\n**************************************************************************************")
+    print("1- Cargar Datos de Archivos Large ")
+    print("2- Cargar Datos de Archivos Small ")
+    print("3- Consultar numero de peliculas buenas (vote_average>=6)")
+    print("4- Cacular el promedio de la votacion")
+    print("5- Consultar buenas peliculas por director")
     print("0- Salir")
+    
+def peliculasBuenas(lst1: list)-> int:
+    #print(lst1)
+    print("Aqui estoy ")
+    nRegistros= len(lst1)
+    pelBuenas=0
+    for i in range (0, nRegistros, 1):
+        if (float(lst1[i]['vote_average']) >= 6):
+            pelBuenas+=1
+            
+        #print(lst1[i]['vote_average'])
+        #pelBuenas=pelBuenas+ float(lst1[i]['vote_average'])
+    #print(pelBuenas)    
+    #input("Click para continuar")
+   
+    return pelBuenas
 
-def countElementsFilteredByColumn(criteria, column, lst):
+def PromedioPeliculasBuenas(lst1: list)-> float:
+    #print(lst1)
+    print("Aqui estoy ")
+    nRegistros= len(lst1)
+    pelBuenas=0
+    proBuenas=0.0
+    for i in range (0, nRegistros, 1):
+        if (float(lst1[i]['vote_average']) >= 6):
+            pelBuenas+=1
+            proBuenas= proBuenas + float(lst1[i]['vote_average'])
+        #print(lst1[i]['vote_average'])
+        #pelBuenas=pelBuenas+ float(lst1[i]['vote_average'])
+    #print(pelBuenas)    
+    #input("Click para continuar")
+    proBuenas=proBuenas/pelBuenas
+    return proBuenas
+
+def peliculasBuenasDirector(lst1: list, lst2:list,  director:str)-> None:
+    #print(lst1)
+    print("Aqui estoy ")
+    nRegistros= len(lst1)
+    pelBuenasDirector=0
+    proBuenas=0.0
+    NuPeliculas=0
+    for i in range (0, nRegistros, 1):
+        if ( lst2[i]['director_name'] == director):
+            NuPeliculas= NuPeliculas+1
+        if (float(lst1[i]['vote_average']) >= 6) and (lst2[i]['director_name'] == director):
+            pelBuenasDirector+=1
+            proBuenas= proBuenas + float(lst1[i]['vote_average'])
+            
+        #print(lst1[i]['vote_average'])
+        #pelBuenas=pelBuenas+ float(lst1[i]['vote_average'])
+    #print(pelBuenas)    
+    #input("Click para continuar")
+    if pelBuenasDirector != 0:
+        proBuenas= proBuenas/pelBuenasDirector
+        respuesta=(pelBuenasDirector, proBuenas)
+    print("El numero de peliculas del director " , director , " son: ", NuPeliculas ,"de las cuales ", pelBuenasDirector, "son buenas. Con un promedio de: ", round(proBuenas,2)) 
+    input ("Clic para cotinuar")
+  #  return respuesta
+
+
+def countElementsFi2lteredByColumn(criteria, column, lst):
     """
     Retorna cuantos elementos coinciden con un criterio para una columna dada  
     Args:
@@ -116,26 +180,40 @@ def main():
     Args: None
     Return: None 
     """
-    lista = [] #instanciar una lista vacia
+    lista1 = [] #instanciar una lista vacia para "Movies Details"
+    lista2 = [] #instanciar una lista vacia para "Casting"
     while True:
         printMenu() #imprimir el menu de opciones en consola
-        inputs =input('Seleccione una opción para continuar\n') #leer opción ingresada
+        inputs =input('Seleccione una opción para continuar:  ') #leer opción ingresada
         if len(inputs)>0:
             if int(inputs[0])==1: #opcion 1
-                loadCSVFile("Data/test.csv", lista) #llamar funcion cargar datos
-                print("Datos cargados, "+str(len(lista))+" elementos cargados")
+                lista1=loadCSVFile("Data/MoviesDetailsCleaned-large.csv", lista1) 
+                print("Datos cargados de Movies Large, "+str(len(lista1))+" elementos cargados")
+                lista2=loadCSVFile("Data/MoviesCastingRaw-large.csv", lista2) 
+                print("Datos cargados de Casting Large, "+str(len(lista2))+" elementos cargados")
+                input ("Clic para cotinuar...")
+
             elif int(inputs[0])==2: #opcion 2
-                if len(lista)==0: #obtener la longitud de la lista
-                    print("La lista esta vacía")    
-                else: print("La lista tiene "+str(len(lista))+" elementos")
+                lista1=loadCSVFile("Data/MoviesDetailsCleaned-small.csv", lista1) 
+                print("Datos cargados de Movies Small, "+str(len(lista1))+" elementos cargados")
+                lista2=loadCSVFile("Data/MoviesCastingRaw-small.csv", lista2) 
+                print("Datos cargados de Casting Small, "+str(len(lista2))+" elementos cargados")
+                input ("Clic para cotinuar")
+
             elif int(inputs[0])==3: #opcion 3
-                criteria =input('Ingrese el criterio de búsqueda\n')
-                counter=countElementsFilteredByColumn(criteria, "nombre", lista) #filtrar una columna por criterio  
-                print("Coinciden ",counter," elementos con el crtierio: ", criteria  )
+                peliculas_buenas= peliculasBuenas(lista1)
+                print("El numero de peliculas revisadas fueron: " , len(lista1) , " de las cuales " , peliculas_buenas , "obtuvieron calificacion >= a 6") 
+                input ("Clic para cotinuar")
+
             elif int(inputs[0])==4: #opcion 4
-                criteria =input('Ingrese el criterio de búsqueda\n')
-                counter=countElementsByCriteria(criteria,0,lista)
-                print("Coinciden ",counter," elementos con el crtierio: '", criteria ,"' (en construcción ...)")
+                proPeliculas_buenas= PromedioPeliculasBuenas(lista1)
+                print("El  promedio de las peliculas buenas fue de:  " , proPeliculas_buenas ) 
+                input ("Clic para cotinuar")
+            elif int(inputs[0])==5: #opcion 5
+                director=input("Digite el nombre del director a consultar: ")
+                peliculasDirector= peliculasBuenasDirector(lista1, lista2, director)
+                #print("El numero de peliculas buenas del director " , director , " son: " , peliculasDirector) 
+                input ("Clic para cotinuar")
             elif int(inputs[0])==0: #opcion 0, salir
                 sys.exit(0)
 
